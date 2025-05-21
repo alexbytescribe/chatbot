@@ -12,6 +12,8 @@ Deploying to [Vercel](https://vercel.com) is the quickest way to get started wit
   - [xAI](https://console.x.ai/)
   - [OpenAI](https://platform.openai.com/account/api-keys)
   - [Fireworks](https://fireworks.ai/account/api-keys)
+  
+Set `AI_PROVIDER=openai` in your environment to use OpenAI instead of the default xAI model.
 
 ### Deploy to Vercel
 
