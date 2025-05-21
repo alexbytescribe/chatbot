@@ -1,5 +1,7 @@
 import type { NextAuthConfig } from 'next-auth';
 
+const requireAuth = process.env.AUTH_REQUIRED !== 'false';
+
 export const authConfig = {
   pages: {
     signIn: '/login',
@@ -11,6 +13,8 @@ export const authConfig = {
   ],
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
+      if (!requireAuth) return true;
+
       const isLoggedIn = !!auth?.user;
       const isOnChat = nextUrl.pathname.startsWith('/');
       const isOnRegister = nextUrl.pathname.startsWith('/register');
