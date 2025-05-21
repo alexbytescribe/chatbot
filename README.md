@@ -65,3 +65,8 @@ pnpm run test
 ```
 
 Tests are also executed automatically on every push and pull request using [GitHub Actions](https://docs.github.com/en/actions).
+
+## Troubleshooting
+
+If you see `Oops, an error occured!` in the chat interface, check that your environment contains the necessary API keys for your selected model provider.
+For example, set `XAI_API_KEY` when using the default xAI models or define `OPENAI_API_KEY` when `AI_PROVIDER=openai`.
