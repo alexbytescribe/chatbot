@@ -59,3 +59,15 @@ pnpm dev
 ```
 
 Your app template should now be running on [localhost:3000](http://localhost:3000/).
+
+## Testing
+
+Playwright tests are included in the `tests` directory. Run them locally with:
+
+```bash
+pnpm install
+pnpm run db:migrate
+pnpm run test
+```
+
+Tests are also executed automatically on every push and pull request using [GitHub Actions](https://docs.github.com/en/actions).
