@@ -50,11 +50,25 @@ export async function POST(request: Request) {
       return new Response('Unauthorized', { status: 401 });
     }
 
-    const userMessage = getMostRecentUserMessage(messages);
+  const userMessage = getMostRecentUserMessage(messages);
 
-    if (!userMessage) {
-      return new Response('No user message found', { status: 400 });
-    }
+  if (!userMessage) {
+    return new Response('No user message found', { status: 400 });
+  }
+
+  if (selectedChatModel === 'xai' && !process.env.XAI_API_KEY) {
+    console.error('XAI_API_KEY is missing');
+    return new Response('Server misconfiguration: missing XAI_API_KEY', {
+      status: 500,
+    });
+  }
+
+  if (selectedChatModel !== 'xai' && !process.env.OPENAI_API_KEY) {
+    console.error('OPENAI_API_KEY is missing');
+    return new Response('Server misconfiguration: missing OPENAI_API_KEY', {
+      status: 500,
+    });
+  }
 
     if (session?.user?.id) {
       const chat = await getChatById({ id });
