@@ -59,3 +59,13 @@ pnpm dev
 ```
 
 Your app template should now be running on [localhost:3000](http://localhost:3000/).
+
+## Continuous Integration
+
+This repository includes a GitHub Actions workflow that installs dependencies, lints the code, and runs the Playwright test suite on every push or pull request to the `main` branch. To enable the workflow:
+
+1. Open your GitHub repository and go to **Settings → Secrets and variables → Actions**.
+2. Add all environment variables required by your app (for example `POSTGRES_URL` and `AUTH_SECRET`) as secrets.
+3. Commit and push the repository. GitHub will automatically execute the workflow defined at `.github/workflows/test.yml`.
+
+You can view the status of each run in the **Actions** tab of your repository.
