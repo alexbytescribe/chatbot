@@ -41,8 +41,12 @@ export async function POST(request: Request) {
     } = await request.json();
 
     const session = await auth();
+    const requireAuth = process.env.AUTH_REQUIRED !== 'false';
 
-    if (!session || !session.user || !session.user.id) {
+    if (
+      requireAuth &&
+      (!session || !session.user || !session.user.id)
+    ) {
       return new Response('Unauthorized', { status: 401 });
     }
 
@@ -52,32 +56,34 @@ export async function POST(request: Request) {
       return new Response('No user message found', { status: 400 });
     }
 
-    const chat = await getChatById({ id });
+    if (session?.user?.id) {
+      const chat = await getChatById({ id });
 
-    if (!chat) {
-      const title = await generateTitleFromUserMessage({
-        message: userMessage,
-      });
+      if (!chat) {
+        const title = await generateTitleFromUserMessage({
+          message: userMessage,
+        });
 
-      await saveChat({ id, userId: session.user.id, title });
-    } else {
-      if (chat.userId !== session.user.id) {
-        return new Response('Unauthorized', { status: 401 });
+        await saveChat({ id, userId: session.user.id, title });
+      } else {
+        if (chat.userId !== session.user.id) {
+          return new Response('Unauthorized', { status: 401 });
+        }
       }
-    }
 
-    await saveMessages({
-      messages: [
-        {
-          chatId: id,
-          id: userMessage.id,
-          role: 'user',
-          parts: userMessage.parts,
-          attachments: userMessage.experimental_attachments ?? [],
-          createdAt: new Date(),
-        },
-      ],
-    });
+      await saveMessages({
+        messages: [
+          {
+            chatId: id,
+            id: userMessage.id,
+            role: 'user',
+            parts: userMessage.parts,
+            attachments: userMessage.experimental_attachments ?? [],
+            createdAt: new Date(),
+          },
+        ],
+      });
+    }
 
     return createDataStreamResponse({
       execute: (dataStream) => {
@@ -175,19 +181,22 @@ export async function DELETE(request: Request) {
   }
 
   const session = await auth();
+  const requireAuth = process.env.AUTH_REQUIRED !== 'false';
 
-  if (!session || !session.user) {
+  if (requireAuth && (!session || !session.user)) {
     return new Response('Unauthorized', { status: 401 });
   }
 
   try {
-    const chat = await getChatById({ id });
+    if (session?.user?.id) {
+      const chat = await getChatById({ id });
 
-    if (chat.userId !== session.user.id) {
-      return new Response('Unauthorized', { status: 401 });
+      if (chat.userId !== session.user.id) {
+        return new Response('Unauthorized', { status: 401 });
+      }
+
+      await deleteChatById({ id });
     }
-
-    await deleteChatById({ id });
 
     return new Response('Chat deleted', { status: 200 });
   } catch (error) {
