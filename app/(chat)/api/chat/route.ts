@@ -127,7 +127,7 @@ export async function POST(request: Request) {
             }),
           },
           onFinish: async ({ response }) => {
-            if (session.user?.id) {
+            if (session?.user?.id) {
               try {
                 const assistantId = getTrailingMessageId({
                   messages: response.messages.filter(
