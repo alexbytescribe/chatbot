@@ -10,8 +10,9 @@ export async function GET(request: Request) {
   }
 
   const session = await auth();
+  const requireAuth = process.env.AUTH_REQUIRED !== 'false';
 
-  if (!session || !session.user || !session.user.email) {
+  if (requireAuth && (!session || !session.user || !session.user.email)) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
     return new Response('Chat not found', { status: 404 });
   }
 
-  if (chat.userId !== session.user.id) {
+  if (session?.user?.id && chat.userId !== session.user.id) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -43,8 +44,9 @@ export async function PATCH(request: Request) {
   }
 
   const session = await auth();
+  const requireAuth = process.env.AUTH_REQUIRED !== 'false';
 
-  if (!session || !session.user || !session.user.email) {
+  if (requireAuth && (!session || !session.user || !session.user.email)) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -54,7 +56,7 @@ export async function PATCH(request: Request) {
     return new Response('Chat not found', { status: 404 });
   }
 
-  if (chat.userId !== session.user.id) {
+  if (session?.user?.id && chat.userId !== session.user.id) {
     return new Response('Unauthorized', { status: 401 });
   }
 

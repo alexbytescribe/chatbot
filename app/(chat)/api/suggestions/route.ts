@@ -10,8 +10,9 @@ export async function GET(request: Request) {
   }
 
   const session = await auth();
+  const requireAuth = process.env.AUTH_REQUIRED !== 'false';
 
-  if (!session || !session.user) {
+  if (requireAuth && (!session || !session.user)) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
     return Response.json([], { status: 200 });
   }
 
-  if (suggestion.userId !== session.user.id) {
+  if (session?.user?.id && suggestion.userId !== session.user.id) {
     return new Response('Unauthorized', { status: 401 });
   }
 

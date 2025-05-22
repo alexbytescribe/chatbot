@@ -19,8 +19,9 @@ const FileSchema = z.object({
 
 export async function POST(request: Request) {
   const session = await auth();
+  const requireAuth = process.env.AUTH_REQUIRED !== 'false';
 
-  if (!session) {
+  if (requireAuth && !session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
