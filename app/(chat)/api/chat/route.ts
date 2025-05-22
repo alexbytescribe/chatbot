@@ -174,7 +174,11 @@ export async function POST(request: Request) {
           sendReasoning: true,
         });
       },
-      onError: () => {
+      onError: (error: unknown) => {
+        console.error('[POST /api/chat] streaming error:', error);
+        if (error instanceof Error && error.message) {
+          return error.message;
+        }
         return 'Oops, an error occured!';
       },
     });
