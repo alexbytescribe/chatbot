@@ -35,7 +35,12 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import type { Chat } from '@/lib/db/schema';
-import { fetcher } from '@/lib/utils';
+import {
+  fetcher,
+  getLocalStorage,
+  setLocalStorage,
+  removeLocalStorage,
+} from '@/lib/utils';
 
 type GroupedChats = {
   today: Chat[];
@@ -104,9 +109,12 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     data: history,
     isLoading,
     mutate,
-  } = useSWR<Array<Chat>>(user ? '/api/history' : null, fetcher, {
-    fallbackData: [],
-  });
+  } = useSWR<Array<Chat>>(user ? '/api/history' : 'local-history',
+    user ? fetcher : () => getLocalStorage('chat-history'),
+    {
+      fallbackData: [],
+    },
+  );
 
   useEffect(() => {
     mutate();
@@ -116,6 +124,20 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter();
   const handleDelete = async () => {
+    if (!user) {
+      const history = getLocalStorage('chat-history') as Array<Chat>;
+      const newHistory = history.filter((h) => h.id !== deleteId);
+      setLocalStorage('chat-history', newHistory);
+      removeLocalStorage(`chat:${deleteId}:messages`);
+      mutate(newHistory);
+      setShowDeleteDialog(false);
+      if (deleteId === id) {
+        router.push('/');
+      }
+      toast.success('Chat deleted successfully');
+      return;
+    }
+
     const deletePromise = fetch(`/api/chat?id=${deleteId}`, {
       method: 'DELETE',
     });
@@ -140,17 +162,6 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     }
   };
 
-  if (!user) {
-    return (
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <div className="px-2 text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2">
-            Login to save and revisit previous chats!
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -348,7 +359,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete your
-              chat and remove it from our servers.
+              chat history.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

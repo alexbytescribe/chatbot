@@ -45,6 +45,18 @@ export function getLocalStorage(key: string) {
   return [];
 }
 
+export function setLocalStorage(key: string, value: unknown) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+}
+
+export function removeLocalStorage(key: string) {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(key);
+  }
+}
+
 export function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
