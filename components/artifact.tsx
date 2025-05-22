@@ -66,6 +66,7 @@ function PureArtifact({
   reload,
   votes,
   isReadonly,
+  isAuthenticated,
 }: {
   chatId: string;
   input: string;
@@ -81,6 +82,7 @@ function PureArtifact({
   handleSubmit: UseChatHelpers['handleSubmit'];
   reload: UseChatHelpers['reload'];
   isReadonly: boolean;
+  isAuthenticated: boolean;
 }) {
   const { artifact, setArtifact, metadata, setMetadata } = useArtifact();
 
@@ -89,7 +91,9 @@ function PureArtifact({
     isLoading: isDocumentsFetching,
     mutate: mutateDocuments,
   } = useSWR<Array<Document>>(
-    artifact.documentId !== 'init' && artifact.status !== 'streaming'
+    isAuthenticated &&
+      artifact.documentId !== 'init' &&
+      artifact.status !== 'streaming'
       ? `/api/document?id=${artifact.documentId}`
       : null,
     fetcher,
@@ -126,6 +130,8 @@ function PureArtifact({
   const handleContentChange = useCallback(
     (updatedContent: string) => {
       if (!artifact) return;
+
+      if (!isAuthenticated) return;
 
       mutate<Array<Document>>(
         `/api/document?id=${artifact.documentId}`,
