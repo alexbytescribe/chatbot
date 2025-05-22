@@ -1,5 +1,21 @@
 import type { NextConfig } from 'next';
 
+const ContentSecurityPolicy = `
+  default-src 'self';
+  script-src 'self' 'unsafe-eval' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  img-src * blob: data:;
+  connect-src *;
+  font-src 'self';
+`;
+
+const securityHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: ContentSecurityPolicy.replace(/\s{2,}/g, ' ').trim(),
+  },
+];
+
 const nextConfig: NextConfig = {
   experimental: {
     ppr: true,
@@ -10,6 +26,18 @@ const nextConfig: NextConfig = {
         hostname: 'avatar.vercel.sh',
       },
     ],
+  },
+  async headers() {
+    if (process.env.NODE_ENV === 'development') {
+      return [
+        {
+          source: '/:path*',
+          headers: securityHeaders,
+        },
+      ];
+    }
+
+    return [];
   },
 };
 
