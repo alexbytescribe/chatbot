@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline';
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net;
   style-src 'self' 'unsafe-inline';
   img-src * blob: data:;
   connect-src *;
