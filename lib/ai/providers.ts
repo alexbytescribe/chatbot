@@ -15,7 +15,9 @@ export const myProvider = isTestEnvironment
         '4o': chatModel,
         '4.1': chatModel,
         '4.1-mini': titleModel,
+        'title-model': titleModel,
         '4.1-nano': artifactModel,
+        'artifact-model': artifactModel,
       },
     })
   : customProvider({
@@ -24,7 +26,9 @@ export const myProvider = isTestEnvironment
         '4o': openai.chat('gpt-4o'),
         '4.1': openai.chat('gpt-4.1'),
         '4.1-mini': openai.chat('gpt-4.1-mini'),
+        'title-model': openai.chat('gpt-4.1-mini'),
         '4.1-nano': openai.chat('gpt-4.1-nano'),
+        'artifact-model': openai.chat('gpt-4.1-nano'),
       },
       imageModels: {
         'small-model': openai.image('dall-e-3'),
