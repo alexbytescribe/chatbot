@@ -15,8 +15,9 @@ export async function GET(request: Request) {
   }
 
   const session = await auth();
+  const requireAuth = process.env.AUTH_REQUIRED !== 'false';
 
-  if (!session || !session.user) {
+  if (requireAuth && (!session || !session.user)) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -28,7 +29,7 @@ export async function GET(request: Request) {
     return new Response('Not Found', { status: 404 });
   }
 
-  if (document.userId !== session.user.id) {
+  if (session?.user?.id && document.userId !== session.user.id) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -44,8 +45,9 @@ export async function POST(request: Request) {
   }
 
   const session = await auth();
+  const requireAuth = process.env.AUTH_REQUIRED !== 'false';
 
-  if (!session) {
+  if (requireAuth && !session) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -82,8 +84,9 @@ export async function PATCH(request: Request) {
   }
 
   const session = await auth();
+  const requireAuth = process.env.AUTH_REQUIRED !== 'false';
 
-  if (!session || !session.user) {
+  if (requireAuth && (!session || !session.user)) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -91,7 +94,7 @@ export async function PATCH(request: Request) {
 
   const [document] = documents;
 
-  if (document.userId !== session.user.id) {
+  if (session?.user?.id && document.userId !== session.user.id) {
     return new Response('Unauthorized', { status: 401 });
   }
 
