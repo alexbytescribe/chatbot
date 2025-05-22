@@ -16,6 +16,10 @@ export async function GET(request: Request) {
     return new Response('Unauthorized', { status: 401 });
   }
 
+  if (!session?.user?.id) {
+    return Response.json([], { status: 200 });
+  }
+
   const chat = await getChatById({ id: chatId });
 
   if (!chat) {
@@ -48,6 +52,10 @@ export async function PATCH(request: Request) {
 
   if (requireAuth && (!session || !session.user || !session.user.email)) {
     return new Response('Unauthorized', { status: 401 });
+  }
+
+  if (!session?.user?.id) {
+    return Response.json({ skipped: true }, { status: 200 });
   }
 
   const chat = await getChatById({ id: chatId });
