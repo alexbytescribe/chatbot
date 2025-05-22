@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   }: { content: string; title: string; kind: ArtifactKind } =
     await request.json();
 
-  if (session.user?.id) {
+  if (session?.user?.id) {
     const document = await saveDocument({
       id,
       content,
@@ -68,6 +68,10 @@ export async function POST(request: Request) {
     });
 
     return Response.json(document, { status: 200 });
+  }
+
+  if (!requireAuth) {
+    return Response.json({ skipped: true }, { status: 200 });
   }
 
   return new Response('Unauthorized', { status: 401 });
