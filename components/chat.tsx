@@ -2,11 +2,16 @@
 
 import type { Attachment, UIMessage } from 'ai';
 import { useChat } from '@ai-sdk/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
 import type { Vote } from '@/lib/db/schema';
-import { fetcher, generateUUID } from '@/lib/utils';
+import {
+  fetcher,
+  generateUUID,
+  getLocalStorage,
+  setLocalStorage,
+} from '@/lib/utils';
 import { Artifact } from './artifact';
 import { MultimodalInput } from './multimodal-input';
 import { Messages } from './messages';
@@ -18,13 +23,20 @@ export function Chat({
   initialMessages,
   selectedChatModel,
   isReadonly,
+  isAuthenticated,
 }: {
   id: string;
   initialMessages: Array<UIMessage>;
   selectedChatModel: string;
   isReadonly: boolean;
+  isAuthenticated: boolean;
 }) {
   const { mutate } = useSWRConfig();
+
+  const storedInitialMessages =
+    !isAuthenticated && typeof window !== 'undefined'
+      ? (getLocalStorage(`chat:${id}:messages`) as Array<UIMessage>)
+      : initialMessages;
 
   const {
     messages,
@@ -39,7 +51,7 @@ export function Chat({
   } = useChat({
     id,
     body: { id, selectedChatModel: selectedChatModel },
-    initialMessages,
+    initialMessages: storedInitialMessages,
     experimental_throttle: 100,
     sendExtraMessageFields: true,
     generateId: generateUUID,
@@ -63,6 +75,31 @@ export function Chat({
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLocalStorage(`chat:${id}:messages`, messages);
+
+      if (messages.length > 0) {
+        const firstUser = messages.find((m) => m.role === 'user');
+        const title =
+          typeof firstUser?.parts?.[0] === 'string'
+            ? (firstUser?.parts[0] as string).slice(0, 80)
+            : 'New Chat';
+
+        const history = (getLocalStorage('chat-history') as Array<any>) || [];
+        const existing = history.find((c) => c.id === id);
+
+        if (existing) {
+          existing.title = title;
+        } else {
+          history.push({ id, title, createdAt: new Date().toISOString() });
+        }
+
+        setLocalStorage('chat-history', history);
+      }
+    }
+  }, [messages, isAuthenticated, id]);
 
   return (
     <>

@@ -12,27 +12,23 @@ import { Attachment, UIMessage } from 'ai';
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const { id } = params;
-  const chat = await getChatById({ id });
+  const session = await auth();
+  const isAuthenticated = !!session?.user;
 
-  if (!chat) {
+  const chat = isAuthenticated ? await getChatById({ id }) : null;
+
+  if (isAuthenticated && !chat) {
     notFound();
   }
 
-  const session = await auth();
-
-  if (chat.visibility === 'private') {
-    if (!session || !session.user) {
-      return notFound();
-    }
-
+  if (isAuthenticated && chat && chat.visibility === 'private') {
     if (session.user.id !== chat.userId) {
       return notFound();
     }
   }
 
-  const messagesFromDb = await getMessagesByChatId({
-    id,
-  });
+  const messagesFromDb =
+    isAuthenticated && chat ? await getMessagesByChatId({ id }) : [];
 
   function convertToUIMessages(messages: Array<DBMessage>): Array<UIMessage> {
     return messages.map((message) => ({
@@ -49,15 +45,17 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get('chat-model');
+  const readonly = isAuthenticated ? session.user.id !== chat!.userId : false;
 
   if (!chatModelFromCookie) {
     return (
       <>
         <Chat
-          id={chat.id}
+          id={id}
           initialMessages={convertToUIMessages(messagesFromDb)}
           selectedChatModel={DEFAULT_CHAT_MODEL}
-          isReadonly={session?.user?.id !== chat.userId}
+          isReadonly={readonly}
+          isAuthenticated={isAuthenticated}
         />
         <DataStreamHandler id={id} />
       </>
@@ -67,10 +65,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <>
       <Chat
-        id={chat.id}
+        id={id}
         initialMessages={convertToUIMessages(messagesFromDb)}
         selectedChatModel={chatModelFromCookie.value}
-        isReadonly={session?.user?.id !== chat.userId}
+        isReadonly={readonly}
+        isAuthenticated={isAuthenticated}
       />
       <DataStreamHandler id={id} />
     </>
