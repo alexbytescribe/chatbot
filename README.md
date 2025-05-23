@@ -40,6 +40,7 @@ This template ships with [xAI](https://x.ai) `grok-2-1212` as the default chat m
 ## Running locally
 
 You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js AI Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary. The `AUTH_REQUIRED` variable controls whether users must sign in (`true` by default; set to `false` to make login optional).
+When authentication is optional, set `ANON_USER_ID` to the ID of a user record that will own newly created documents.
 
 > Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
 
