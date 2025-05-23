@@ -59,6 +59,14 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
           kind: config.kind,
           userId: args.session.user.id,
         });
+      } else if (process.env.AUTH_REQUIRED === 'false' && process.env.ANON_USER_ID) {
+        await saveDocument({
+          id: args.id,
+          title: args.title,
+          content: draftContent,
+          kind: config.kind,
+          userId: process.env.ANON_USER_ID,
+        });
       }
 
       return;
@@ -78,6 +86,14 @@ export function createDocumentHandler<T extends ArtifactKind>(config: {
           content: draftContent,
           kind: config.kind,
           userId: args.session.user.id,
+        });
+      } else if (process.env.AUTH_REQUIRED === 'false' && process.env.ANON_USER_ID) {
+        await saveDocument({
+          id: args.document.id,
+          title: args.document.title,
+          content: draftContent,
+          kind: config.kind,
+          userId: process.env.ANON_USER_ID,
         });
       }
 

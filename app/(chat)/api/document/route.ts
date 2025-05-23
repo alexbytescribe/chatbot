@@ -69,7 +69,19 @@ export async function POST(request: Request) {
 
     return Response.json(document, { status: 200 });
   }
-  
+
+  if (!requireAuth && process.env.ANON_USER_ID) {
+    const document = await saveDocument({
+      id,
+      content,
+      title,
+      kind,
+      userId: process.env.ANON_USER_ID,
+    });
+
+    return Response.json(document, { status: 200 });
+  }
+
   if (!requireAuth) {
     return Response.json({ skipped: true }, { status: 200 });
   }
